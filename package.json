@@ -8,6 +8,7 @@
   "dependencies": {
     "@elysiajs/swagger": "^0.2.0",
     "elysia": "latest",
+    "prisma": "^4.10.1",
     "zod": "^3.20.6"
   },
   "devDependencies": {

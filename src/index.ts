@@ -1,40 +1,52 @@
-import { Elysia, type Context } from 'elysia'
+import { Elysia, type Context, t } from 'elysia'
 import { swagger } from '@elysiajs/swagger'
-import { schema } from '../utils/loginSchema'
+import { PrismaClient } from '@prisma/client'
 
+const prisma = new PrismaClient()
 
 const app = new Elysia()
 
 app.use(swagger())
 
-app.get('/', () => 'Hello Elysia')
-
-app.get('/abbas', () => { name: 'Abbas' })
-
-app.post('/login', ({ body, set }: { body: any, set: Context['set'] }) => {
-    try {
-        const { username, password } = schema.parse(body)
-        if (username !== 'abbas' && password !== '123456') {
-            set.status = 401
-            return {
-                status: '200',
-                message: 'Login successful'
-            }
-        } else {
-            set.status = 401
-            return {
-                status: '401',
-                message: 'Login failed'
-            }
-        }
-    } catch (error: any) {
-        set.status = 400
-        return {
-            status: '400',
-            message: JSON.parse(error)
-        }
+app.get('/', () => {
+    return {
+        status: '200',
+        message: 'Welcome to Elysia'
     }
+})
 
+app.post('/signup', ({ body, set }: {
+    body: any, set: Context['set']
+}) => {
+    const { username, email } = body
+    prisma.users.create({
+        data: {
+            username,
+            email,
+        }
+    }).then((user) => {
+        console.log({ user })
+        set.status = 200
+        return {
+            status: '200',
+            message: 'User created successfully',
+            user: user
+        }
+    }).catch((err) => {
+        console.log({ err })
+        set.status = 401
+        return {
+            status: '401',
+            message: 'User creation failed'
+        }
+    })
+}, {
+    schema: {
+        body: t.Object({
+            username: t.String(),
+            email: t.String()
+        })
+    }
 })
 
 
